@@ -1,0 +1,47 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+    <id>hsb.learn.ideaplugin-demo</id>
+
+    <!-- Public plugin name should be written in Title Case.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-name -->
+    <name>Ideaplugin-demo</name>
+
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor url="https://www.yourcompany.com">YourCompany</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-description -->
+    <description><![CDATA[
+        Enter short description for your plugin here.<br>
+        <em>most HTML tags may be used</em>
+    ]]></description>
+
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- 注册启动活动，2024版本推荐方式 -->
+        <postStartupActivity implementation="com.fish.novel.NovelStartup"/>
+
+        <!-- ⚠️ 新增：Settings 界面 -->
+        <applicationConfigurable
+                parentId="tools"
+                instance="com.fish.novel.NovelConfigurable"
+                id="com.fish.novel.NovelConfigurable"
+                displayName="Novel Reader"/>
+
+        <!-- ⚠️ 新增：持久化服务 -->
+        <applicationService serviceImplementation="com.fish.novel.NovelConfig"/>
+    </extensions>
+
+
+<!--    <applicationListeners>-->
+<!--        <listener class="com.fish.novel.NovelEditorListener"-->
+<!--                  topic="com.intellij.openapi.editor.event.EditorFactoryListener"/>-->
+<!--    </applicationListeners>-->
+
+</idea-plugin>
