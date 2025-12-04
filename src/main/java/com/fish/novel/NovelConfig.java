@@ -12,6 +12,7 @@ public final class NovelConfig implements PersistentStateComponent<NovelConfig> 
 
     public String legadoUrl = "http://192.168.1.113:1122";
     public String bookName = "";
+    public String matchPrefix = "函数";  //匹配前缀
 
     public static NovelConfig getInstance() {
         return ((ComponentManager)ApplicationManager.getApplication()).getService(NovelConfig.class);

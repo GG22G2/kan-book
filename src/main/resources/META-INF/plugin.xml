@@ -5,18 +5,62 @@
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-name -->
-    <name>Ideaplugin-demo</name>
+    <name>kan-book</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor url="https://www.yourcompany.com">YourCompany</vendor>
+    <vendor url="a"></vendor>
 
-    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
-         Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-description -->
     <description><![CDATA[
-        Enter short description for your plugin here.<br>
-        <em>most HTML tags may be used</em>
-    ]]></description>
+    <h2>Novel Reader / 摸鱼阅读器</h2>
+    <p>
+        A discrete novel reading plugin for IntelliJ IDEA, integrated with the <b>Legado (阅读)</b> app. Seamlessly switch between coding and reading without leaving your editor.
+    </p>
+    <p>
+        一款基于 IntelliJ IDEA 的隐蔽式小说阅读插件，深度集成 <b>Legado (阅读)</b> APP。让您在代码编辑器中无缝切换工作与阅读模式。
+    </p>
 
+    <br/>
+
+    <h3>✨ Features / 核心功能</h3>
+    <ul>
+        <li><b>Seamless Integration:</b> Read novels directly inside the Java editor context. <br/> 无缝集成：直接在 Java 编辑器上下文中阅读小说。</li>
+        <li><b>Remote Source:</b> Fetches content wirelessly from Legado App via Web Service. <br/> 远程书源：通过 Web 服务直接获取 Legado App 中的书籍内容。</li>
+        <li><b>Scroll Mode:</b> Uses mouse scroll to turn pages when active. <br/> 滚轮翻页：激活模式下，编辑器滚轮将变更为小说翻页功能。</li>
+    </ul>
+
+    <br/>
+
+    <h3>⚙️ Configuration / 配置指南</h3>
+    <p>Go to <b>Settings/Preferences | Tools | Novel Reader</b> to configure:</p>
+    <p>前往 <b>设置 | 工具 | Novel Reader</b> 进行配置：</p>
+    <ul>
+        <li><b>Legado URL:</b> The Web Service address from Legado App (e.g., 192.168.1.5:1122). <br/> 阅读 App 的 Web 服务地址。</li>
+        <li><b>Book Name:</b> The exact name of the novel you want to read. <br/> 书架中准确的书籍名称。</li>
+        <li><b>Match Keyword:</b> The trigger text (prefix) to activate reading mode. <br/> 触发阅读模式的关键词（前缀）。</li>
+    </ul>
+
+    <br/>
+
+    <h3>🚀 How to Use / 使用说明</h3>
+    <ol>
+        <li>
+            <b>Prerequisite:</b> Install <a href="https://github.com/gedoor/legado">Legado (阅读) App</a> and enable "Web Service".<br/>
+            <b>前置条件：</b> 安装 Legado (阅读) App 并开启“Web服务”。
+        </li>
+        <li>
+            <b>Activate:</b> Open a <b>Java file</b>. Place your cursor immediately after the configured <b>Match Keyword</b>.<br/>
+            <b>激活：</b> 在 Java 文件中，将光标移动到配置的<b>关键词</b>紧后方。
+        </li>
+        <li>
+            <b>Read:</b> Once activated, scroll the mouse wheel to turn pages.<br/>
+            <b>阅读：</b> 激活状态下，滚动鼠标滚轮即可翻页阅读。
+        </li>
+        <li>
+            <b>Exit:</b> Move the cursor away (Click elsewhere, type code, or delete text).<br/>
+            <b>退出：</b> 移动光标（点击其他位置、输入代码或删除字符）即可自动退出阅读模式。
+        </li>
+    </ol>
+    ]]></description>
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>

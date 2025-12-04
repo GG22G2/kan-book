@@ -51,7 +51,7 @@ public class NovelEditorListener implements EditorFactoryListener {
         private Inlay<?> currentInlay = null;
         private int currentTriggerOffset = -1;
 
-        private static final String TRIGGER = "假如";
+        //private static final String TRIGGER = "假如";
         private static final int RENDER_BUFFER_SIZE = 100; // 预读长度
 
         public NovelHandler(Editor editor) {
@@ -134,6 +134,7 @@ public class NovelEditorListener implements EditorFactoryListener {
         }
 
         private void checkCaret() {
+            String TRIGGER = NovelConfig.getInstance().matchPrefix;
             if (editor.isDisposed() || editor.getDocument().isInBulkUpdate()) return;
             int offset = editor.getCaretModel().getOffset();
             if (offset < TRIGGER.length()) { disable(); return; }
