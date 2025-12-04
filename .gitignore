@@ -43,3 +43,7 @@ bin/
 .DS_Store
 # 项目排除路径
 /.intellijPlatform/
+
+.idea
+/gradle/wrapper/gradle-wrapper.jar
+.run
