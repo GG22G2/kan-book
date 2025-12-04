@@ -1,17 +1,16 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-    <id>hsb.learn.ideaplugin-demo</id>
+    <id>hsb.learn.kan-book</id>
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-name -->
     <name>kan-book</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor url="a"></vendor>
+    <vendor url="">gg22g2</vendor>
 
-    <description><![CDATA[
-    <h2>Novel Reader / 摸鱼阅读器</h2>
+    <description><![CDATA[<h2>Novel Reader / 摸鱼阅读器</h2>
     <p>
         A discrete novel reading plugin for IntelliJ IDEA, integrated with the <b>Legado (阅读)</b> app. Seamlessly switch between coding and reading without leaving your editor.
     </p>
@@ -59,8 +58,7 @@
             <b>Exit:</b> Move the cursor away (Click elsewhere, type code, or delete text).<br/>
             <b>退出：</b> 移动光标（点击其他位置、输入代码或删除字符）即可自动退出阅读模式。
         </li>
-    </ol>
-    ]]></description>
+    </ol>]]></description>
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
