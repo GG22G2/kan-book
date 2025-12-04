@@ -1,1 +1,1 @@
-rootProject.name = "ideaplugin-demo"
+rootProject.name = "kan-book"
