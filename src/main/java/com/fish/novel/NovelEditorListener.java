@@ -6,6 +6,7 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.event.*;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
@@ -26,8 +27,7 @@ public class NovelEditorListener implements EditorFactoryListener {
         Editor editor = event.getEditor();
         Disposable handler = editor.getUserData(NovelGlobalService.HANDLER_KEY);
         if (handler != null) {
-            handler.dispose();
-            editor.putUserData(NovelGlobalService.HANDLER_KEY, null);
+            Disposer.dispose(handler);
         }
     }
 
@@ -36,34 +36,38 @@ public class NovelEditorListener implements EditorFactoryListener {
         if (virtualFile == null || !virtualFile.getName().endsWith(".java")) return; // 仅限Java，可自行去掉限制
         if (editor.getUserData(NovelGlobalService.HANDLER_KEY) != null) return;
 
-        NovelHandler handler = new NovelHandler(editor);
+        NovelGlobalService service = NovelGlobalService.getInstance();
+        NovelHandler handler = new NovelHandler(editor, service);
+        Disposer.register(service, handler);
+        handler.attach();
         editor.putUserData(NovelGlobalService.HANDLER_KEY, handler);
     }
 
     private static class NovelHandler implements Disposable {
         private final Editor editor;
+        private final NovelGlobalService service;
         private final CaretListener caretListener;
         private final DocumentListener documentListener;
         private final MouseWheelListener mouseWheelListener;
         private final Runnable uiRefreshCallback;
 
         private boolean isActive = false;
+        private boolean disposed = false;
         private Inlay<?> currentInlay = null;
         private int currentTriggerOffset = -1;
 
         //private static final String TRIGGER = "假如";
         private static final int RENDER_BUFFER_SIZE = 100; // 预读长度
 
-        public NovelHandler(Editor editor) {
+        public NovelHandler(Editor editor, NovelGlobalService service) {
             this.editor = editor;
+            this.service = service;
 
-            // 1. Service 通知回调
             this.uiRefreshCallback = () -> {
                 if (isActive && !editor.isDisposed()) updateDisplay();
             };
-            NovelGlobalService.getInstance().addUiListener(this.uiRefreshCallback);
+            service.addUiListener(this.uiRefreshCallback);
 
-            // 2. 监听器
             this.caretListener = new CaretListener() {
                 @Override
                 public void caretPositionChanged(@NotNull CaretEvent e) { checkCaret(); }
@@ -76,16 +80,17 @@ public class NovelEditorListener implements EditorFactoryListener {
                 @Override
                 public void mouseWheelMoved(MouseWheelEvent e) { handleMouseWheel(e); }
             };
+        }
 
+        private void attach() {
             editor.getCaretModel().addCaretListener(caretListener);
-            editor.getDocument().addDocumentListener(documentListener, this);
+            editor.getDocument().addDocumentListener(documentListener);
         }
 
         private void handleMouseWheel(MouseWheelEvent e) {
             if (!isActive) return;
             e.consume();
 
-            NovelGlobalService service = NovelGlobalService.getInstance();
             String content = service.getContent();
             int currentIndex = service.getIndex();
             int rot = e.getWheelRotation();
@@ -156,7 +161,7 @@ public class NovelEditorListener implements EditorFactoryListener {
             if (!isActive) {
                 isActive = true;
                 editor.getContentComponent().addMouseWheelListener(mouseWheelListener);
-                NovelGlobalService.getInstance().ensureConnect(); // 懒加载触发点
+                service.ensureConnect();
                 updateDisplay();
             }
         }
@@ -174,7 +179,6 @@ public class NovelEditorListener implements EditorFactoryListener {
             ApplicationManager.getApplication().invokeLater(() -> {
                 if (editor.isDisposed() || !isActive) return;
 
-                NovelGlobalService service = NovelGlobalService.getInstance();
                 String full = service.getContent();
                 int globalIndex = service.getIndex();
 
@@ -210,11 +214,18 @@ public class NovelEditorListener implements EditorFactoryListener {
 
         @Override
         public void dispose() {
+            if (disposed) return;
+            disposed = true;
+            isActive = false;
+            currentTriggerOffset = -1;
             editor.getCaretModel().removeCaretListener(caretListener);
             editor.getDocument().removeDocumentListener(documentListener);
             editor.getContentComponent().removeMouseWheelListener(mouseWheelListener);
-            NovelGlobalService.getInstance().removeUiListener(this.uiRefreshCallback);
+            service.removeUiListener(this.uiRefreshCallback);
             disposeInlay();
+            if (!editor.isDisposed()) {
+                editor.putUserData(NovelGlobalService.HANDLER_KEY, null);
+            }
         }
     }
 }

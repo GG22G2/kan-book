@@ -6,12 +6,14 @@ import com.intellij.openapi.components.ComponentManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Key;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 核心服务：增加防抖保存机制 (Debounce Saving)
@@ -38,11 +40,19 @@ public final class NovelGlobalService implements Disposable {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     // 待执行的保存任务（用于防抖）
     private ScheduledFuture<?> pendingSaveTask;
-    // 观察者列表
     private final List<Runnable> uiListeners = new CopyOnWriteArrayList<>();
+    private final AtomicBoolean editorListenerRegistered = new AtomicBoolean();
+    private final NovelEditorListener editorListener = new NovelEditorListener();
 
     public static NovelGlobalService getInstance() {
         return ((ComponentManager)ApplicationManager.getApplication()).getService(NovelGlobalService.class);
+    }
+
+    public @NotNull NovelEditorListener ensureEditorListenerRegistered(@NotNull EditorFactory factory) {
+        if (editorListenerRegistered.compareAndSet(false, true)) {
+            factory.addEditorFactoryListener(editorListener, this);
+        }
+        return editorListener;
     }
 
     // ================= 外部调用接口 =================
@@ -258,9 +268,9 @@ public final class NovelGlobalService implements Disposable {
         for (Editor editor : EditorFactory.getInstance().getAllEditors()) {
             Disposable handler = editor.getUserData(HANDLER_KEY);
             if (handler != null) {
-                handler.dispose();
-                editor.putUserData(HANDLER_KEY, null);
+                Disposer.dispose(handler);
             }
         }
+        uiListeners.clear();
     }
 }

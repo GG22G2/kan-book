@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 @State(name = "NovelConfig", storages = @Storage("novel-reader.xml"))
 public final class NovelConfig implements PersistentStateComponent<NovelConfig> {
 
-    public String legadoUrl = "http://192.168.1.113:1122";
+    public String legadoUrl = "http://192.168.0.178:1122";
     public String bookName = "";
     public String matchPrefix = "函数";  //匹配前缀
 

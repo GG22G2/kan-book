@@ -14,13 +14,9 @@ public class NovelStartup implements ProjectActivity {
     @Override
     public Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
         EditorFactory factory = EditorFactory.getInstance();
-        NovelEditorListener listener = new NovelEditorListener();
         NovelGlobalService globalService = NovelGlobalService.getInstance();
+        NovelEditorListener listener = globalService.ensureEditorListenerRegistered(factory);
 
-        // 绑定生命周期
-        factory.addEditorFactoryListener(listener, globalService);
-
-        // 初始化已有编辑器
         for (Editor editor : factory.getAllEditors()) {
             listener.initEditor(editor);
         }
