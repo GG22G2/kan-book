@@ -2,6 +2,7 @@ package com.fish.novel;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.BaseState;
+import com.intellij.openapi.components.ComponentManager;
 import com.intellij.openapi.components.RoamingType;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.SimplePersistentStateComponent;
@@ -18,7 +19,8 @@ public final class NovelConfig extends SimplePersistentStateComponent<NovelConfi
     }
 
     public static NovelConfig getInstance() {
-        return ApplicationManager.getApplication().getService(NovelConfig.class);
+        ComponentManager application = (ComponentManager) ApplicationManager.getApplication();
+        return application.getService(NovelConfig.class);
     }
 
     public String getLegadoUrl() {

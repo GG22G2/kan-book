@@ -5,69 +5,67 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.awt.*;
 
 public class NovelConfigurable implements Configurable {
 
-    private JTextField urlField;
-    private JTextField bookNameField;
-    private JTextField matchTextField;
+    private NovelSettingsComponent settingsComponent;
+
     @Override
     public @Nls(capitalization = Nls.Capitalization.Title) String getDisplayName() {
         return "Novel Reader";
     }
 
-
     @Override
     public @Nullable JComponent createComponent() {
-        JPanel panel = new JPanel(new GridLayout(4, 1)); // 简单布局
+        if (settingsComponent == null) {
+            settingsComponent = new NovelSettingsComponent();
+        }
+        reset();
+        return settingsComponent.getPanel();
+    }
 
-        JPanel urlPanel = new JPanel(new BorderLayout());
-        urlPanel.add(new JLabel("阅读(Legado) Web服务URL (e.g. 192.168.1.5:1122): "), BorderLayout.WEST);
-        urlField = new JTextField();
-        urlPanel.add(urlField, BorderLayout.CENTER);
-
-        JPanel bookPanel = new JPanel(new BorderLayout());
-        bookPanel.add(new JLabel("书名: "), BorderLayout.WEST);
-        bookNameField = new JTextField();
-        bookPanel.add(bookNameField, BorderLayout.CENTER);
-
-
-        JPanel matchTextPanel = new JPanel(new BorderLayout());
-        matchTextPanel.add(new JLabel("匹配关键词: "), BorderLayout.WEST);
-        matchTextField = new JTextField();
-        matchTextPanel.add(matchTextField, BorderLayout.CENTER);
-
-
-        panel.add(urlPanel);
-        panel.add(bookPanel);
-        panel.add(matchTextPanel);
-        panel.add(new JLabel("提示：修改后需在编辑器内滚动滚轮触发重载"));
-
-        NovelConfig config = NovelConfig.getInstance();
-        urlField.setText(config.getLegadoUrl());
-        bookNameField.setText(config.getBookName());
-        matchTextField.setText(config.getMatchPrefix());
-        JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.add(panel, BorderLayout.NORTH);
-        return wrapper;
+    @Override
+    public @Nullable JComponent getPreferredFocusedComponent() {
+        return settingsComponent == null ? null : settingsComponent.getPreferredFocusedComponent();
     }
 
     @Override
     public boolean isModified() {
+        if (settingsComponent == null) {
+            return false;
+        }
         NovelConfig config = NovelConfig.getInstance();
-        return !urlField.getText().equals(config.getLegadoUrl()) ||
-               !bookNameField.getText().equals(config.getBookName()) ||
-               !matchTextField.getText().equals(config.getMatchPrefix());
+        return !settingsComponent.getLegadoUrl().equals(config.getLegadoUrl()) ||
+               !settingsComponent.getBookName().equals(config.getBookName()) ||
+               !settingsComponent.getMatchPrefix().equals(config.getMatchPrefix());
     }
 
     @Override
     public void apply() {
+        if (settingsComponent == null) {
+            return;
+        }
         NovelConfig config = NovelConfig.getInstance();
-        config.setLegadoUrl(urlField.getText());
-        config.setBookName(bookNameField.getText());
-        config.setMatchPrefix(matchTextField.getText());
+        config.setLegadoUrl(settingsComponent.getLegadoUrl());
+        config.setBookName(settingsComponent.getBookName());
+        config.setMatchPrefix(settingsComponent.getMatchPrefix());
         // 配置修改后，强制 Service 重载
         NovelGlobalService.getInstance().reload();
+    }
+
+    @Override
+    public void reset() {
+        if (settingsComponent == null) {
+            return;
+        }
+        NovelConfig config = NovelConfig.getInstance();
+        settingsComponent.setLegadoUrl(config.getLegadoUrl());
+        settingsComponent.setBookName(config.getBookName());
+        settingsComponent.setMatchPrefix(config.getMatchPrefix());
+    }
+
+    @Override
+    public void disposeUIResources() {
+        settingsComponent = null;
     }
 }

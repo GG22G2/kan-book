@@ -45,7 +45,8 @@ public final class NovelGlobalService implements Disposable {
     private final NovelEditorListener editorListener = new NovelEditorListener();
 
     public static NovelGlobalService getInstance() {
-        return ((ComponentManager)ApplicationManager.getApplication()).getService(NovelGlobalService.class);
+        ComponentManager application = (ComponentManager) ApplicationManager.getApplication();
+        return application.getService(NovelGlobalService.class);
     }
 
     public @NotNull NovelEditorListener ensureEditorListenerRegistered(@NotNull EditorFactory factory) {
