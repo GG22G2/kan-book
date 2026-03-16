@@ -17,7 +17,7 @@ public class NovelInlayRenderer implements EditorCustomElementRenderer {
     private final String rawText;
 
     // 统一配置
-    public static final int VIEWPORT_WIDTH = 600;
+    public static final int VIEWPORT_WIDTH = 450;
     public static final int PADDING_LEFT = 10;
 
     public NovelInlayRenderer(String text) {
