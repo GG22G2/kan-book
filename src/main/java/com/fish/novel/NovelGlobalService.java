@@ -64,8 +64,9 @@ public final class NovelGlobalService implements Disposable {
     }
 
     public void reload() {
-        String bookName = NovelConfig.getInstance().bookName;
-        String url = NovelConfig.getInstance().legadoUrl;
+        NovelConfig config = NovelConfig.getInstance();
+        String bookName = config.getBookName();
+        String url = config.getLegadoUrl();
 
         if (bookName == null || bookName.isEmpty() || url == null || url.isEmpty()) {
             updateStatus("请在 Settings 中配置 Legado URL 和 书名", true);

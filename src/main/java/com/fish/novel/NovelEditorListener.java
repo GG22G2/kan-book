@@ -139,14 +139,14 @@ public class NovelEditorListener implements EditorFactoryListener {
         }
 
         private void checkCaret() {
-            String TRIGGER = NovelConfig.getInstance().matchPrefix;
+            String trigger = NovelConfig.getInstance().getMatchPrefix();
             if (editor.isDisposed() || editor.getDocument().isInBulkUpdate()) return;
             int offset = editor.getCaretModel().getOffset();
-            if (offset < TRIGGER.length()) { disable(); return; }
+            if (offset < trigger.length()) { disable(); return; }
 
             try {
-                String prevText = editor.getDocument().getText(new TextRange(offset - TRIGGER.length(), offset));
-                if (TRIGGER.equals(prevText)) {
+                String prevText = editor.getDocument().getText(new TextRange(offset - trigger.length(), offset));
+                if (trigger.equals(prevText)) {
                     if (isActive && offset == currentTriggerOffset) return;
                     if (isActive && offset != currentTriggerOffset) disable();
                     currentTriggerOffset = offset;

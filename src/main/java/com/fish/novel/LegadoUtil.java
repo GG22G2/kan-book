@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.intellij.openapi.diagnostic.Logger;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -16,13 +17,15 @@ import java.util.*;
 
 public class LegadoUtil {
 
+    private static final Logger LOG = Logger.getInstance(LegadoUtil.class);
+
     private static final HttpClient client = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
             .build();
     private static final Gson gson = new Gson();
 
     private static String getBaseUrl() {
-        String url = NovelConfig.getInstance().legadoUrl;
+        String url = NovelConfig.getInstance().getLegadoUrl();
         if (!url.startsWith("http")) return "http://" + url;
         return url;
     }
@@ -69,7 +72,7 @@ public class LegadoUtil {
             }
             return Optional.of(new ChapterContent(null, contentStr, index));
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.warn("Failed to parse chapter content for index " + index, e);
             return Optional.empty();
         }
     }
@@ -92,9 +95,14 @@ public class LegadoUtil {
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody, StandardCharsets.UTF_8))
                     .build();
 
-            client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                LOG.warn("Failed to save reading progress, status code: " + response.statusCode());
+                return false;
+            }
             return true;
         } catch (Exception e) {
+            LOG.warn("Failed to save reading progress for book: " + book.name(), e);
             return false;
         }
     }
@@ -107,8 +115,13 @@ public class LegadoUtil {
                     .GET()
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200 ? response.body() : null;
+            if (response.statusCode() == 200) {
+                return response.body();
+            }
+            LOG.warn("Legado request failed, path: " + path + ", status code: " + response.statusCode());
+            return null;
         } catch (Exception e) {
+            LOG.warn("Legado request failed, path: " + path, e);
             return null;
         }
     }
@@ -123,7 +136,9 @@ public class LegadoUtil {
             if (array.isJsonArray()) {
                 return gson.fromJson(array, TypeToken.getParameterized(List.class, clazz).getType());
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            LOG.warn("Failed to parse Legado list response for type: " + clazz.getSimpleName(), e);
+        }
         return Collections.emptyList();
     }
 

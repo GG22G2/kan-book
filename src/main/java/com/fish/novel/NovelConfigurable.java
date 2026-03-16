@@ -45,9 +45,9 @@ public class NovelConfigurable implements Configurable {
         panel.add(new JLabel("提示：修改后需在编辑器内滚动滚轮触发重载"));
 
         NovelConfig config = NovelConfig.getInstance();
-        urlField.setText(config.legadoUrl);
-        bookNameField.setText(config.bookName);
-        matchTextField.setText(config.matchPrefix);
+        urlField.setText(config.getLegadoUrl());
+        bookNameField.setText(config.getBookName());
+        matchTextField.setText(config.getMatchPrefix());
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.add(panel, BorderLayout.NORTH);
         return wrapper;
@@ -56,17 +56,17 @@ public class NovelConfigurable implements Configurable {
     @Override
     public boolean isModified() {
         NovelConfig config = NovelConfig.getInstance();
-        return !urlField.getText().equals(config.legadoUrl) ||
-               !bookNameField.getText().equals(config.bookName) ||
-        !matchTextField.getText().equals(config.matchPrefix);
+        return !urlField.getText().equals(config.getLegadoUrl()) ||
+               !bookNameField.getText().equals(config.getBookName()) ||
+               !matchTextField.getText().equals(config.getMatchPrefix());
     }
 
     @Override
     public void apply() {
         NovelConfig config = NovelConfig.getInstance();
-        config.legadoUrl = urlField.getText();
-        config.bookName = bookNameField.getText();
-        config.matchPrefix = matchTextField.getText();
+        config.setLegadoUrl(urlField.getText());
+        config.setBookName(bookNameField.getText());
+        config.setMatchPrefix(matchTextField.getText());
         // 配置修改后，强制 Service 重载
         NovelGlobalService.getInstance().reload();
     }

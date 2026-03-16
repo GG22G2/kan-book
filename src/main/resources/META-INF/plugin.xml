@@ -77,7 +77,7 @@
                 displayName="Novel Reader"/>
 
         <!-- ⚠️ 新增：持久化服务 -->
-        <applicationService serviceImplementation="com.fish.novel.NovelConfig"/>
+<!--        <applicationService serviceImplementation="com.fish.novel.NovelConfig"/>-->
     </extensions>
 
 
