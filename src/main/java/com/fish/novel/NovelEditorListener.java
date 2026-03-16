@@ -2,7 +2,6 @@ package com.fish.novel;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.Inlay;
 import com.intellij.openapi.editor.event.*;
@@ -96,7 +95,7 @@ public class NovelEditorListener implements EditorFactoryListener {
             int rot = e.getWheelRotation();
 
             // 准备计算环境
-            int availableWidth = NovelInlayRenderer.VIEWPORT_WIDTH - NovelInlayRenderer.PADDING_LEFT;
+            int availableWidth = NovelInlayRenderer.getViewportWidth() - NovelInlayRenderer.PADDING_LEFT;
             String sample = (content != null && content.length() > currentIndex + 10)
                     ? content.substring(currentIndex, currentIndex + 10) : "";
             Font font = NovelInlayRenderer.getSmartFont(editor, sample);
@@ -188,20 +187,17 @@ public class NovelEditorListener implements EditorFactoryListener {
                 int end = Math.min(globalIndex + RENDER_BUFFER_SIZE, full.length());
                 String snippet = (globalIndex < end) ? full.substring(globalIndex, end) : "";
 
-                WriteCommandAction.runWriteCommandAction(editor.getProject(), () -> {
-                    disposeInlay();
-                    // 再次校验 offset 依然有效
-                    if (currentTriggerOffset != -1 && currentTriggerOffset <= editor.getDocument().getTextLength()) {
-                        Inlay<?> inlay = editor.getInlayModel().addInlineElement(
-                                currentTriggerOffset,
-                                true,
-                                new NovelInlayRenderer(snippet) // Renderer 会根据宽度自动截断
-                        );
-                        currentInlay = inlay;
-                    } else {
-                        disable();
-                    }
-                });
+                disposeInlay();
+                if (currentTriggerOffset != -1 && currentTriggerOffset <= editor.getDocument().getTextLength()) {
+                    Inlay<?> inlay = editor.getInlayModel().addInlineElement(
+                            currentTriggerOffset,
+                            true,
+                            new NovelInlayRenderer(snippet)
+                    );
+                    currentInlay = inlay;
+                } else {
+                    disable();
+                }
             });
         }
 

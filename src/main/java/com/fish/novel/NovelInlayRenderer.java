@@ -17,7 +17,6 @@ public class NovelInlayRenderer implements EditorCustomElementRenderer {
     private final String rawText;
 
     // 统一配置
-    public static final int VIEWPORT_WIDTH = 450;
     public static final int PADDING_LEFT = 10;
 
     public NovelInlayRenderer(String text) {
@@ -26,7 +25,7 @@ public class NovelInlayRenderer implements EditorCustomElementRenderer {
 
     @Override
     public int calcWidthInPixels(@NotNull Inlay inlay) {
-        return VIEWPORT_WIDTH;
+        return getViewportWidth();
     }
 
     @Override
@@ -52,7 +51,7 @@ public class NovelInlayRenderer implements EditorCustomElementRenderer {
         int baseline = (int) (targetRegion.y + metrics.getAscent() + (targetRegion.height - metrics.getHeight()) / 2.0);
 
         // 核心：计算能画多少字
-        int availableWidth = VIEWPORT_WIDTH - PADDING_LEFT;
+        int availableWidth = getViewportWidth() - PADDING_LEFT;
         int fitCount = calculateFittingCount(rawText, metrics, availableWidth);
 
         String textToDraw = (fitCount < rawText.length()) ? rawText.substring(0, fitCount) : rawText;
@@ -79,12 +78,19 @@ public class NovelInlayRenderer implements EditorCustomElementRenderer {
 
     public static Font getSmartFont(Editor editor, String sampleText) {
         Font codeFont = editor.getColorsScheme().getFont(EditorFontType.PLAIN);
+        int configuredSize = NovelConfig.getInstance().getRendererFontSize();
+        int fontSize = configuredSize > 0 ? configuredSize : codeFont.getSize();
+        Font preferredFont = codeFont.deriveFont((float) fontSize);
         String testStr = (sampleText == null || sampleText.length() < 2) ? "测试" : sampleText;
-        if (codeFont.canDisplayUpTo(testStr) == -1) {
-            return codeFont;
+        if (preferredFont.canDisplayUpTo(testStr) == -1) {
+            return preferredFont;
         } else {
-            return new Font("Dialog", Font.PLAIN, codeFont.getSize());
+            return new Font("Dialog", Font.PLAIN, fontSize);
         }
+    }
+
+    public static int getViewportWidth() {
+        return Math.max(PADDING_LEFT + 20, NovelConfig.getInstance().getViewportWidth());
     }
 
     private Color getContextColor(Editor editor, int offset) {

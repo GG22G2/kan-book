@@ -47,10 +47,28 @@ public final class NovelConfig extends SimplePersistentStateComponent<NovelConfi
         getState().setMatchPrefix(matchPrefix);
     }
 
+    public int getViewportWidth() {
+        return getState().getViewportWidth();
+    }
+
+    public void setViewportWidth(int viewportWidth) {
+        getState().setViewportWidth(viewportWidth);
+    }
+
+    public int getRendererFontSize() {
+        return getState().getRendererFontSize();
+    }
+
+    public void setRendererFontSize(int rendererFontSize) {
+        getState().setRendererFontSize(rendererFontSize);
+    }
+
     public static final class ConfigState extends BaseState {
         private final StoredProperty<String> legadoUrl = string("http://192.168.0.178:1122");
         private final StoredProperty<String> bookName = string("");
         private final StoredProperty<String> matchPrefix = string("函数");
+        private final StoredProperty<Integer> viewportWidth = property(450);
+        private final StoredProperty<Integer> rendererFontSize = property(0);
 
         public String getLegadoUrl() {
             return legadoUrl.getValue(this);
@@ -74,6 +92,22 @@ public final class NovelConfig extends SimplePersistentStateComponent<NovelConfi
 
         public void setMatchPrefix(String value) {
             matchPrefix.setValue(this, value);
+        }
+
+        public int getViewportWidth() {
+            return viewportWidth.getValue(this);
+        }
+
+        public void setViewportWidth(int value) {
+            viewportWidth.setValue(this, value);
+        }
+
+        public int getRendererFontSize() {
+            return rendererFontSize.getValue(this);
+        }
+
+        public void setRendererFontSize(int value) {
+            rendererFontSize.setValue(this, value);
         }
     }
 }

@@ -245,6 +245,10 @@ public final class NovelGlobalService implements Disposable {
     public void addUiListener(Runnable listener) { uiListeners.add(listener); }
     public void removeUiListener(Runnable listener) { uiListeners.remove(listener); }
 
+    public void requestUiRefresh() {
+        notifyUI();
+    }
+
     private void notifyUI() {
         ApplicationManager.getApplication().invokeLater(() -> {
             for (Runnable listener : uiListeners) listener.run();
@@ -273,6 +277,5 @@ public final class NovelGlobalService implements Disposable {
                 Disposer.dispose(handler);
             }
         }
-        uiListeners.clear();
     }
 }
