@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 核心服务：增加防抖保存机制 (Debounce Saving)
@@ -40,7 +41,7 @@ public final class NovelGlobalService implements Disposable {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     // 待执行的保存任务（用于防抖）
     private ScheduledFuture<?> pendingSaveTask;
-    private final List<Runnable> uiListeners = new CopyOnWriteArrayList<>();
+    private final AtomicReference<Runnable> focusedUiListener = new AtomicReference<>();
     private final AtomicBoolean editorListenerRegistered = new AtomicBoolean();
     private final NovelEditorListener editorListener = new NovelEditorListener();
 
@@ -242,15 +243,23 @@ public final class NovelGlobalService implements Disposable {
 
     // ================= UI通知 =================
 
-    public void addUiListener(Runnable listener) { uiListeners.add(listener); }
-    public void removeUiListener(Runnable listener) { uiListeners.remove(listener); }
+    public void setFocusedUiListener(Runnable listener) {
+        focusedUiListener.set(listener);
+    }
+
+    public void clearFocusedUiListener(Runnable listener) {
+        focusedUiListener.compareAndSet(listener, null);
+    }
 
     public void requestUiRefresh() {
         notifyUI();
     }
 
     private void notifyUI() {
-        for (Runnable listener : uiListeners) listener.run();
+        Runnable listener = focusedUiListener.get();
+        if (listener != null) {
+            listener.run();
+        }
     }
 
     @Override
@@ -268,7 +277,7 @@ public final class NovelGlobalService implements Disposable {
             scheduler.shutdownNow();
         }
 
-        uiListeners.clear();
+        focusedUiListener.set(null);
         for (Editor editor : EditorFactory.getInstance().getAllEditors()) {
             Disposable handler = editor.getUserData(HANDLER_KEY);
             if (handler != null) {

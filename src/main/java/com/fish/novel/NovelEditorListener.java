@@ -11,8 +11,11 @@ import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import javax.swing.SwingUtilities;
 
 public class NovelEditorListener implements EditorFactoryListener {
 
@@ -48,6 +51,7 @@ public class NovelEditorListener implements EditorFactoryListener {
         private final CaretListener caretListener;
         private final DocumentListener documentListener;
         private final MouseWheelListener mouseWheelListener;
+        private final FocusAdapter focusListener;
         private final Runnable uiRefreshCallback;
 
         private boolean isActive = false;
@@ -63,7 +67,6 @@ public class NovelEditorListener implements EditorFactoryListener {
             this.service = service;
 
             this.uiRefreshCallback = this::updateDisplay;
-            service.addUiListener(this.uiRefreshCallback);
 
             this.caretListener = new CaretListener() {
                 @Override
@@ -77,11 +80,26 @@ public class NovelEditorListener implements EditorFactoryListener {
                 @Override
                 public void mouseWheelMoved(MouseWheelEvent e) { handleMouseWheel(e); }
             };
+            this.focusListener = new FocusAdapter() {
+                @Override
+                public void focusGained(FocusEvent e) {
+                    if (isActive) {
+                        service.setFocusedUiListener(uiRefreshCallback);
+                        updateDisplay();
+                    }
+                }
+
+                @Override
+                public void focusLost(FocusEvent e) {
+                    service.clearFocusedUiListener(uiRefreshCallback);
+                }
+            };
         }
 
         private void attach() {
             editor.getCaretModel().addCaretListener(caretListener);
             editor.getDocument().addDocumentListener(documentListener);
+            editor.getContentComponent().addFocusListener(focusListener);
         }
 
         private void handleMouseWheel(MouseWheelEvent e) {
@@ -158,6 +176,9 @@ public class NovelEditorListener implements EditorFactoryListener {
             if (!isActive) {
                 isActive = true;
                 editor.getContentComponent().addMouseWheelListener(mouseWheelListener);
+                if (isEditorFocused()) {
+                    service.setFocusedUiListener(uiRefreshCallback);
+                }
                 service.ensureConnect();
                 updateDisplay();
             }
@@ -167,6 +188,7 @@ public class NovelEditorListener implements EditorFactoryListener {
             if (isActive) {
                 isActive = false;
                 editor.getContentComponent().removeMouseWheelListener(mouseWheelListener);
+                service.clearFocusedUiListener(uiRefreshCallback);
                 currentTriggerOffset = -1;
                 disposeInlay();
             }
@@ -181,7 +203,7 @@ public class NovelEditorListener implements EditorFactoryListener {
         }
 
         private void doUpdateDisplay() {
-            if (editor.isDisposed() || !isActive) return;
+            if (editor.isDisposed() || !isActive || !isEditorFocused()) return;
 
             String full = service.getContent();
             int globalIndex = service.getIndex();
@@ -205,6 +227,12 @@ public class NovelEditorListener implements EditorFactoryListener {
             }
         }
 
+        private boolean isEditorFocused() {
+            Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+            Component contentComponent = editor.getContentComponent();
+            return focusOwner == contentComponent || (focusOwner != null && SwingUtilities.isDescendingFrom(focusOwner, contentComponent));
+        }
+
         private void disposeInlay() {
             if (currentInlay != null) {
                 if (currentInlay.isValid()) currentInlay.dispose();
@@ -220,8 +248,9 @@ public class NovelEditorListener implements EditorFactoryListener {
             currentTriggerOffset = -1;
             editor.getCaretModel().removeCaretListener(caretListener);
             editor.getDocument().removeDocumentListener(documentListener);
+            editor.getContentComponent().removeFocusListener(focusListener);
             editor.getContentComponent().removeMouseWheelListener(mouseWheelListener);
-            service.removeUiListener(this.uiRefreshCallback);
+            service.clearFocusedUiListener(this.uiRefreshCallback);
             disposeInlay();
             if (!editor.isDisposed()) {
                 editor.putUserData(NovelGlobalService.HANDLER_KEY, null);
