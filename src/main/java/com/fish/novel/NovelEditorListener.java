@@ -62,9 +62,7 @@ public class NovelEditorListener implements EditorFactoryListener {
             this.editor = editor;
             this.service = service;
 
-            this.uiRefreshCallback = () -> {
-                if (isActive && !editor.isDisposed()) updateDisplay();
-            };
+            this.uiRefreshCallback = this::updateDisplay;
             service.addUiListener(this.uiRefreshCallback);
 
             this.caretListener = new CaretListener() {
@@ -175,30 +173,36 @@ public class NovelEditorListener implements EditorFactoryListener {
         }
 
         private void updateDisplay() {
-            ApplicationManager.getApplication().invokeLater(() -> {
-                if (editor.isDisposed() || !isActive) return;
+            if (ApplicationManager.getApplication().isDispatchThread()) {
+                doUpdateDisplay();
+            } else {
+                ApplicationManager.getApplication().invokeLater(this::doUpdateDisplay);
+            }
+        }
 
-                String full = service.getContent();
-                int globalIndex = service.getIndex();
+        private void doUpdateDisplay() {
+            if (editor.isDisposed() || !isActive) return;
 
-                if (full == null) full = "Loading...";
-                if (globalIndex >= full.length()) globalIndex = Math.max(0, full.length() - 1);
+            String full = service.getContent();
+            int globalIndex = service.getIndex();
 
-                int end = Math.min(globalIndex + RENDER_BUFFER_SIZE, full.length());
-                String snippet = (globalIndex < end) ? full.substring(globalIndex, end) : "";
+            if (full == null) full = "Loading...";
+            if (globalIndex >= full.length()) globalIndex = Math.max(0, full.length() - 1);
 
-                disposeInlay();
-                if (currentTriggerOffset != -1 && currentTriggerOffset <= editor.getDocument().getTextLength()) {
-                    Inlay<?> inlay = editor.getInlayModel().addInlineElement(
-                            currentTriggerOffset,
-                            true,
-                            new NovelInlayRenderer(snippet)
-                    );
-                    currentInlay = inlay;
-                } else {
-                    disable();
-                }
-            });
+            int end = Math.min(globalIndex + RENDER_BUFFER_SIZE, full.length());
+            String snippet = (globalIndex < end) ? full.substring(globalIndex, end) : "";
+
+            disposeInlay();
+            if (currentTriggerOffset != -1 && currentTriggerOffset <= editor.getDocument().getTextLength()) {
+                Inlay<?> inlay = editor.getInlayModel().addInlineElement(
+                        currentTriggerOffset,
+                        true,
+                        new NovelInlayRenderer(snippet)
+                );
+                currentInlay = inlay;
+            } else {
+                disable();
+            }
         }
 
         private void disposeInlay() {

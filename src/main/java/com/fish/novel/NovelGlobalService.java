@@ -250,9 +250,7 @@ public final class NovelGlobalService implements Disposable {
     }
 
     private void notifyUI() {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            for (Runnable listener : uiListeners) listener.run();
-        });
+        for (Runnable listener : uiListeners) listener.run();
     }
 
     @Override
