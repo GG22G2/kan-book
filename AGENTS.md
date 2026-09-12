@@ -23,7 +23,15 @@ There is no committed test suite yet and no coverage gate. For new logic, add JU
 Recent history uses very short subjects such as `.` and `Initial commit`, so there is no strong convention to preserve. Prefer clear, imperative commit messages such as `feat: add chapter cache` or `fix: guard null editor state`. Pull requests should describe the user-visible change, note any config updates, link related issues, and include screenshots or GIFs for settings or editor-rendering changes.
 
 ## Configuration Notes
-`build.gradle.kts` currently points to a local IntelliJ installation and a custom sandbox directory. Update those paths before building on a new machine to avoid environment-specific failures.
+This checkout is wired for a fully offline build on this machine; every path points at a local install, so nothing is downloaded:
+
+- Gradle 9.3.1 lives in `G:\kaifa_environment\gradle-9.3.1`. `gradle/wrapper/gradle-wrapper.properties` sets `distributionUrl` to the zip packaged from that installation (`file:///G:/kaifa_environment/gradle-9.3.1/gradle-9.3.1-bin.zip`), so `./gradlew.bat` never reaches the network. Re-package that zip (top-level `gradle-9.3.1/` directory required) only if the installation is replaced, and note that running the `wrapper` task rewrites the URL back to services.gradle.org.
+- `build.gradle.kts` resolves the IntelliJ Platform from the local IDE at `G:\JetBrains\Toolbox\IntelliJ IDEA Ultimate`.
+- `gradle.properties` pins the Java 21 toolchain to `G:/kaifa_environment/jdk/graalvm-jdk-21.0.8+12.1`, because Gradle's toolchain auto-detection does not scan `G:\kaifa_environment\jdk`.
+- Dependencies resolve from the local Maven mirror `G:/kaifa_environment/maven-repository` first, with `mavenCentral()` as fallback.
+- Code instrumentation is disabled (`instrumentCode = false`) because the instrumentation tools are only published to JetBrains repositories. Re-enable it, and fetch those tools once, before publishing.
+- In IntelliJ IDEA, Gradle is set to the local installation (`G:\kaifa_environment\gradle-9.3.1`); keep that instead of switching to the wrapper.
 
 ## 运行方式
-intellj idea中通过运行插件的runIde来运行。 gradle已经配置为本地的gradle
+intellj idea中通过运行插件的runIde来运行。 gradle 已经配置为本机的 gradle（`G:\kaifa_environment\gradle-9.3.1`），
+wrapper 指向该安装打包出的本地分发包，走 `file://` 路径，不会联网下载。

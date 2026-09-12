@@ -8,6 +8,8 @@ group = "hsb.learn"
 version = "1.0"
 
 repositories {
+    // Offline: prefer the local Maven mirror
+    maven { url = uri("file:///G:/kaifa_environment/maven-repository") }
     mavenCentral()
     intellijPlatform {
         defaultRepositories()
@@ -24,12 +26,16 @@ dependencies {
         // Add necessary plugin dependencies for compilation here, example:
         // bundledPlugin("com.intellij.java")
 
-        local("C:\\Users\\Administrator\\AppData\\Local\\Programs\\IntelliJ IDEA Ultimate")
+        local("G:\\JetBrains\\Toolbox\\IntelliJ IDEA Ultimate")
     }
     implementation("com.google.code.gson:gson:2.10.1")
 }
 
 intellijPlatform {
+    // Offline: instrumentation tools are served only from JetBrains repositories
+    // Set back to true after fetching them once if instrumentation is needed
+    instrumentCode = false
+
     pluginConfiguration {
         ideaVersion {
             sinceBuild = "251"
