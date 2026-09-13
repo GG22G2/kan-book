@@ -63,12 +63,21 @@ public final class NovelConfig extends SimplePersistentStateComponent<NovelConfi
         getState().setRendererFontSize(rendererFontSize);
     }
 
+    public int getRenderLineCount() {
+        return getState().getRenderLineCount();
+    }
+
+    public void setRenderLineCount(int renderLineCount) {
+        getState().setRenderLineCount(renderLineCount);
+    }
+
     public static final class ConfigState extends BaseState {
-        private final StoredProperty<String> legadoUrl = string("http://192.168.0.178:1122");
-        private final StoredProperty<String> bookName = string("");
+        private final StoredProperty<String> legadoUrl = string("http://192.168.2.151:1122");
+        private final StoredProperty<String> bookName = string("十日终焉");
         private final StoredProperty<String> matchPrefix = string("函数");
         private final StoredProperty<Integer> viewportWidth = property(450);
         private final StoredProperty<Integer> rendererFontSize = property(0);
+        private final StoredProperty<Integer> renderLineCount = property(3);
 
         public String getLegadoUrl() {
             return legadoUrl.getValue(this);
@@ -108,6 +117,14 @@ public final class NovelConfig extends SimplePersistentStateComponent<NovelConfi
 
         public void setRendererFontSize(int value) {
             rendererFontSize.setValue(this, value);
+        }
+
+        public int getRenderLineCount() {
+            return renderLineCount.getValue(this);
+        }
+
+        public void setRenderLineCount(int value) {
+            renderLineCount.setValue(this, value);
         }
     }
 }

@@ -55,8 +55,8 @@ public final class NovelProjectController implements Disposable {
         if (project.isDisposed() || editor == null || editor.isDisposed()) {
             return false;
         }
-        VirtualFile virtualFile = editor.getVirtualFile();
-        return virtualFile != null && virtualFile.getName().endsWith(".java");
+        // 任何有真实文件的编辑器都能用；激活仍然只取决于光标是否紧跟关键词
+        return editor.getVirtualFile() != null;
     }
 
     private void detachCurrentHandler() {

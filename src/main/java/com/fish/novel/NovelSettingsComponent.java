@@ -15,6 +15,7 @@ public class NovelSettingsComponent implements ConfigurableUi<NovelConfig> {
     private final JTextField matchTextField = new JTextField();
     private final JSpinner viewportWidthSpinner = new JSpinner(new SpinnerNumberModel(450, 120, 2400, 10));
     private final JSpinner fontSizeSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 72, 1));
+    private final JSpinner lineCountSpinner = new JSpinner(new SpinnerNumberModel(3, 1, 20, 1));
 
     public NovelSettingsComponent() {
         configureSpinners();
@@ -24,6 +25,7 @@ public class NovelSettingsComponent implements ConfigurableUi<NovelConfig> {
                 .addLabeledComponent("书名:", bookNameField, 1, false)
                 .addLabeledComponent("匹配关键词:", matchTextField, 1, false)
                 .addLabeledComponent("阅读区宽度:", viewportWidthSpinner, 1, false)
+                .addLabeledComponent("展示行数:", lineCountSpinner, 1, false)
                 .addLabeledComponent("字体大小(0=跟随编辑器):", fontSizeSpinner, 1, false)
                 .addComponent(new JLabel("提示：修改后会自动重载阅读内容"), 1)
                 .addComponentFillVertically(new JPanel(), 0)
@@ -33,6 +35,7 @@ public class NovelSettingsComponent implements ConfigurableUi<NovelConfig> {
     private void configureSpinners() {
         configureSpinner(viewportWidthSpinner, 6);
         configureSpinner(fontSizeSpinner, 4);
+        configureSpinner(lineCountSpinner, 4);
     }
 
     private void configureSpinner(JSpinner spinner, int columns) {
@@ -92,6 +95,14 @@ public class NovelSettingsComponent implements ConfigurableUi<NovelConfig> {
         fontSizeSpinner.setValue(Math.max(0, Math.min(72, fontSize)));
     }
 
+    public int getLineCount() {
+        return ((Number) lineCountSpinner.getValue()).intValue();
+    }
+
+    public void setLineCount(int lineCount) {
+        lineCountSpinner.setValue(Math.max(1, Math.min(20, lineCount)));
+    }
+
     @Override
     public void reset(NovelConfig settings) {
         setLegadoUrl(settings.getLegadoUrl());
@@ -99,6 +110,7 @@ public class NovelSettingsComponent implements ConfigurableUi<NovelConfig> {
         setMatchPrefix(settings.getMatchPrefix());
         setViewportWidth(settings.getViewportWidth());
         setFontSize(settings.getRendererFontSize());
+        setLineCount(settings.getRenderLineCount());
     }
 
     @Override
@@ -107,7 +119,8 @@ public class NovelSettingsComponent implements ConfigurableUi<NovelConfig> {
                 !normalize(getBookName()).equals(settings.getBookName()) ||
                 !normalize(getMatchPrefix()).equals(settings.getMatchPrefix()) ||
                 getViewportWidth() != settings.getViewportWidth() ||
-                getFontSize() != settings.getRendererFontSize();
+                getFontSize() != settings.getRendererFontSize() ||
+                getLineCount() != settings.getRenderLineCount();
     }
 
     @Override
@@ -117,19 +130,22 @@ public class NovelSettingsComponent implements ConfigurableUi<NovelConfig> {
         String matchPrefix = normalize(getMatchPrefix());
         int viewportWidth = getViewportWidth();
         int fontSize = getFontSize();
+        int lineCount = getLineCount();
 
-        validate(legadoUrl, bookName, matchPrefix, viewportWidth, fontSize);
+        validate(legadoUrl, bookName, matchPrefix, viewportWidth, fontSize, lineCount);
 
         boolean contentSettingsChanged = !legadoUrl.equals(settings.getLegadoUrl()) ||
                 !bookName.equals(settings.getBookName());
         boolean renderSettingsChanged = viewportWidth != settings.getViewportWidth() ||
-                fontSize != settings.getRendererFontSize();
+                fontSize != settings.getRendererFontSize() ||
+                lineCount != settings.getRenderLineCount();
 
         settings.setLegadoUrl(legadoUrl);
         settings.setBookName(bookName);
         settings.setMatchPrefix(matchPrefix);
         settings.setViewportWidth(viewportWidth);
         settings.setRendererFontSize(fontSize);
+        settings.setRenderLineCount(lineCount);
 
         if (contentSettingsChanged) {
             NovelGlobalService.getInstance().reload();
@@ -142,7 +158,7 @@ public class NovelSettingsComponent implements ConfigurableUi<NovelConfig> {
         return value == null ? "" : value.trim();
     }
 
-    private void validate(String legadoUrl, String bookName, String matchPrefix, int viewportWidth, int fontSize) throws ConfigurationException {
+    private void validate(String legadoUrl, String bookName, String matchPrefix, int viewportWidth, int fontSize, int lineCount) throws ConfigurationException {
         if (legadoUrl.isEmpty()) {
             throw new ConfigurationException("请填写 Legado Web 服务 URL");
         }
@@ -154,6 +170,9 @@ public class NovelSettingsComponent implements ConfigurableUi<NovelConfig> {
         }
         if (viewportWidth < 120 || viewportWidth > 2400) {
             throw new ConfigurationException("阅读区宽度需在 120 到 2400 之间");
+        }
+        if (lineCount < 1 || lineCount > 20) {
+            throw new ConfigurationException("展示行数需在 1 到 20 之间");
         }
         if (fontSize < 0 || fontSize > 72) {
             throw new ConfigurationException("字体大小需在 0 到 72 之间，0 表示跟随编辑器");
